@@ -110,16 +110,3 @@ window.PHOTOS = {
   {"f":"just-us/album-p04-4","w":505,"h":712,"c":"#080808","t":"A quiet minute, just the two of us."}
  ]
 };
-
-/* Carousel at the top of the page. pos = which part stays in view on narrow screens. */
-window.HERO = [
- {"f":"hero/slide-1","w":1722,"h":2000,"pos":"66% 30%","t":"Under the lights"},
- {"f":"hero/slide-2","w":1752,"h":2000,"pos":"92% 30%","t":"Your hand on my shoulder"},
- {"f":"hero/slide-3","w":1291,"h":1814,"pos":"58% 20%","t":"Your head on my shoulder"},
- {"f":"hero/slide-4","w":1075,"h":2000,"pos":"50% 25%","t":"The road of lights"},
- {"f":"hero/slide-5","w":1174,"h":1425,"pos":"62% 25%","t":"Walking in together"},
- {"f":"hero/slide-6","w":2000,"h":1064,"pos":"50% 50%","t":"Quiet, after all that noise"},
- {"f":"hero/slide-7","w":1541,"h":928,"pos":"50% 30%","t":"Bowing to each other"},
- {"f":"hero/slide-8","w":1278,"h":1822,"pos":"50% 20%","t":"Exactly where you belong"},
- {"f":"hero/slide-9","w":915,"h":1425,"pos":"50% 40%","t":"Notes in the air"}
-];

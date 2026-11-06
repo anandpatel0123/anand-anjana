@@ -355,38 +355,61 @@
   }
   document.querySelectorAll('canvas.lights').forEach(fairyLights);
 
-  /* ---------- Music (only if a song is set) ---------- */
-  var audio = null, playMusic = null, soundLabel = null;
-  if (S.music) {
-    audio = new Audio(S.music);
-    audio.loop = true;
-    audio.volume = 0;
-    var soundBtn = $('sound');
-    var MUSIC_VOLUME = .5, fadeTimer = 0, wantMusic = false;
-    soundLabel = function () {
-      soundBtn.classList.toggle('off', !wantMusic);
-      soundBtn.setAttribute('aria-label', wantMusic ? 'Pause music' : 'Play music');
-    };
-    function fadeIn() {
-      clearInterval(fadeTimer);
-      fadeTimer = setInterval(function () {
-        audio.volume = Math.min(MUSIC_VOLUME, audio.volume + .025);
-        if (audio.volume >= MUSIC_VOLUME) clearInterval(fadeTimer);
-      }, 150);
+  /* ---------- Landing video and its music ---------- */
+  // The video's own soundtrack is the site's music, so it keeps running while she scrolls.
+  // With the sound off it only plays while on screen.
+  var heroVideo = $('heroVideo'), soundBtn = $('sound');
+  var SOUND_LEVEL = .8, wantSound = false, heroInView = true, heroStarted = false, fadeTimer = 0;
+
+  function soundLabel() {
+    soundBtn.classList.toggle('off', !wantSound);
+    soundBtn.setAttribute('aria-label', wantSound ? 'Turn music off' : 'Turn music on');
+  }
+  function fadeIn() {
+    clearInterval(fadeTimer);
+    heroVideo.volume = 0;
+    fadeTimer = setInterval(function () {
+      heroVideo.volume = Math.min(SOUND_LEVEL, heroVideo.volume + .04);
+      if (heroVideo.volume >= SOUND_LEVEL) clearInterval(fadeTimer);
+    }, 120);
+  }
+  function keepPlaying() {
+    if (!heroStarted) return;
+    if (document.hidden) { heroVideo.pause(); return; }
+    if (wantSound || (heroInView && !calm)) {
+      var p = heroVideo.play();
+      if (p && p.catch) p.catch(function () {});
+    } else {
+      heroVideo.pause();
     }
-    playMusic = function () {
-      var started = audio.play();
-      if (started && started.then) {
-        started.then(function () { wantMusic = true; soundLabel(); fadeIn(); }, function () { wantMusic = false; soundLabel(); });
-      }
-    };
-    soundBtn.addEventListener('click', function () {
-      if (audio.paused) { playMusic(); } else { wantMusic = false; audio.pause(); soundLabel(); }
-    });
-    // Stop when she locks the phone or switches apps, and carry on when she comes back
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) audio.pause(); else if (wantMusic) audio.play();
-    });
+  }
+  function startSound() {
+    heroStarted = true;
+    heroVideo.muted = false;
+    var p = heroVideo.play();
+    if (p && p.then) {
+      p.then(function () { wantSound = true; soundLabel(); fadeIn(); },
+        function () { heroVideo.muted = true; wantSound = false; soundLabel(); keepPlaying(); });
+    }
+  }
+  soundBtn.addEventListener('click', function () {
+    if (wantSound) {
+      wantSound = false;
+      clearInterval(fadeTimer);
+      heroVideo.muted = true;
+      soundLabel();
+      keepPlaying();
+    } else {
+      startSound();
+    }
+  });
+  document.addEventListener('visibilitychange', keepPlaying);
+  heroVideo.addEventListener('error', function () { soundBtn.hidden = true; });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      heroInView = entries[0].isIntersecting;
+      keepPlaying();
+    }, { threshold: .1 }).observe($('hero'));
   }
 
   /* ---------- Envelope ---------- */
@@ -397,147 +420,28 @@
       return sessionStorage.getItem('opened') === '1';
     } catch (e) { return false; }
   }
-  function startMusic() {
-    if (!audio) return;
-    $('sound').hidden = false;
-    playMusic();
-  }
   if (seen()) {
     intro.classList.add('skip');
-    if (audio) { $('sound').hidden = false; soundLabel(); }
+    soundBtn.hidden = false;
+    soundLabel();
+    heroStarted = true;
+    keepPlaying();
   } else {
     document.body.classList.add('locked');
     $('envelope').addEventListener('click', function open() {
       $('envelope').removeEventListener('click', open);
       intro.classList.add('opening');
       seen(true);
-      startMusic();
+      soundBtn.hidden = false;
+      soundLabel();
+      heroVideo.currentTime = 0;
+      if (calm) { heroStarted = true; } else { startSound(); }
       setTimeout(function () { petals(46); }, 900);
       setTimeout(function () {
         document.body.classList.remove('locked');
         intro.classList.add('skip');
       }, calm ? 200 : 1950);
     });
-  }
-
-  /* ---------- Background videos ---------- */
-  // Each clip downloads only as she nears it, and pauses once off screen.
-  // With "reduce motion" or data saver on, the still image stays instead.
-  var dataSaver = navigator.connection && navigator.connection.saveData;
-  if ('IntersectionObserver' in window && !calm && !dataSaver) {
-    var bgObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        var v = e.target;
-        if (e.isIntersecting) {
-          if (!v.getAttribute('src')) v.src = v.dataset.src;
-          var p = v.play();
-          if (p && p.catch) p.catch(function () {});
-        } else if (v.getAttribute('src')) {
-          v.pause();
-        }
-      });
-    }, { rootMargin: '250px 0px' });
-    document.querySelectorAll('video.bg-video').forEach(function (v) {
-      v.muted = true;
-      bgObserver.observe(v);
-    });
-  }
-
-  /* ---------- Hero carousel ---------- */
-  var heroData = window.HERO || [];
-  var hero = $('hero'), heroBox = $('heroSlides'), dots = $('heroDots'), pauseBtn = $('heroPause');
-  var heroI = 0, heroTimer = 0, heroPaused = calm, heroHover = false, heroSeen = true;
-  var HERO_MS = 5500;
-
-  var heroSlides = heroData.map(function (s, i) {
-    var el = document.createElement('div');
-    el.className = 'hero-slide' + (s.w / s.h < 1.1 ? ' tall' : '');
-    el.setAttribute('role', 'group');
-    el.setAttribute('aria-roledescription', 'slide');
-    el.setAttribute('aria-label', (i + 1) + ' of ' + heroData.length);
-    el.style.setProperty('--pos', s.pos);
-    var bg = document.createElement('div');
-    bg.className = 'hero-bg';
-    var img = document.createElement('img');
-    img.className = 'hero-photo';
-    img.alt = s.t;
-    img.width = s.w;
-    img.height = s.h;
-    el.append(bg, img);
-    heroBox.appendChild(el);
-    var dot = document.createElement('button');
-    dot.type = 'button';
-    dot.className = 'hero-dot';
-    dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
-    dot.addEventListener('click', function () { heroGo(i); });
-    dots.appendChild(dot);
-    return { el: el, bg: bg, img: img, dot: dot, data: s };
-  });
-
-  // Load only the slide on show and the next one, so the page stays light on phones
-  function heroLoad(i) {
-    var s = heroSlides[i];
-    if (!s || s.img.getAttribute('src')) return;
-    s.img.src = 'images/' + s.data.f + '.jpg';
-    s.bg.style.backgroundImage = 'url(images/' + s.data.f + '-bg.jpg)';
-  }
-  function heroShow(i) {
-    heroI = (i + heroSlides.length) % heroSlides.length;
-    heroLoad(heroI);
-    heroLoad((heroI + 1) % heroSlides.length);
-    heroSlides.forEach(function (s, n) {
-      s.el.classList.toggle('on', n === heroI);
-      s.el.setAttribute('aria-hidden', String(n !== heroI));
-      if (n === heroI) s.dot.setAttribute('aria-current', 'true'); else s.dot.removeAttribute('aria-current');
-    });
-  }
-  function heroRunning() {
-    return !heroPaused && !heroHover && heroSeen && !document.hidden && !lb.open && !document.body.classList.contains('locked') && !hero.querySelector(':focus-visible');
-  }
-  function heroArm() {
-    clearTimeout(heroTimer);
-    heroTimer = setTimeout(function () {
-      if (heroRunning()) heroShow(heroI + 1);
-      heroArm();
-    }, HERO_MS);
-  }
-  function heroGo(i) { heroShow(i); heroArm(); }
-
-  if (heroSlides.length) {
-    heroShow(0);
-    heroArm();
-    $('heroPrev').addEventListener('click', function () { heroGo(heroI - 1); });
-    $('heroNext').addEventListener('click', function () { heroGo(heroI + 1); });
-    function heroPauseState() {
-      pauseBtn.setAttribute('aria-label', heroPaused ? 'Play slideshow' : 'Pause slideshow');
-      $('heroPauseIcon').setAttribute('d', heroPaused ? 'M8 5l11 7-11 7z' : 'M8 5v14M16 5v14');
-    }
-    heroPauseState();
-    pauseBtn.addEventListener('click', function () { heroPaused = !heroPaused; heroPauseState(); heroArm(); });
-    // Only the controls pause it: the hero fills the screen, and a tap counts as a hover that never ends
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      hero.querySelectorAll('.hero-arrow, .hero-controls').forEach(function (el) {
-        el.addEventListener('mouseenter', function () { heroHover = true; });
-        el.addEventListener('mouseleave', function () { heroHover = false; });
-      });
-    }
-    hero.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft') heroGo(heroI - 1);
-      if (e.key === 'ArrowRight') heroGo(heroI + 1);
-    });
-    var hx = null, hy = null;
-    hero.addEventListener('touchstart', function (e) {
-      if (e.touches.length === 1) { hx = e.touches[0].clientX; hy = e.touches[0].clientY; } else { hx = null; }
-    }, { passive: true });
-    hero.addEventListener('touchend', function (e) {
-      if (hx === null) return;
-      var dx = e.changedTouches[0].clientX - hx, dy = e.changedTouches[0].clientY - hy;
-      hx = null;
-      if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.4) heroGo(heroI + (dx < 0 ? 1 : -1));
-    }, { passive: true });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) { heroSeen = entries[0].isIntersecting; }, { threshold: .25 }).observe(hero);
-    }
   }
 
   /* ---------- Top nav ---------- */
