@@ -147,10 +147,16 @@ html:not(.js) .intro{display:none}
 .js .mosaic .ph{opacity:0;transition:opacity .9s ease}
 .js .mosaic .ph.in{opacity:1}
 
+/* ---------- Background video: silent, no controls ---------- */
+.has-video{position:relative;overflow:hidden;isolation:isolate}
+.bg-video{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;object-position:var(--vp,50% 40%);pointer-events:none}
+.bg-video::-webkit-media-controls,.bg-video::-webkit-media-controls-start-playback-button{display:none!important}
+.has-video::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--veil)}
+
 /* ---------- Story ---------- */
-.story-intro{padding:clamp(64px,10vw,120px) var(--gutter) clamp(40px,6vw,72px);text-align:center;background:var(--wine)}
+.story-intro{--veil:linear-gradient(rgba(42,10,28,.3),rgba(20,7,15,.22) 34%,rgba(20,7,15,.84) 66%,#191012);display:grid;place-content:end center;min-height:min(92vh,860px);min-height:min(92svh,860px);padding:clamp(64px,10vw,120px) var(--gutter) clamp(40px,6vw,72px);text-align:center;background:var(--wine)}
 .story-intro h2{font-size:clamp(2.6rem,8vw,4.6rem);margin:.2em 0 .3em}
-.story-intro p:last-child{max-width:32em;margin:0 auto;color:var(--ivory-dim)}
+.story-intro p:last-child{max-width:32em;margin:0 auto;color:var(--ivory)}
 
 .chapter{--accent:var(--gold);--bg:var(--night);--fg:var(--ivory);--fg-dim:var(--ivory-dim);padding:clamp(56px,9vw,120px) var(--gutter);background:var(--bg);color:var(--fg)}
 .chapter .eyebrow{color:var(--accent)}
@@ -173,7 +179,9 @@ html:not(.js) .intro{display:none}
 .c-sangeet .num{color:#fff}
 .c-wedding{--accent:var(--rani-lit);--bg:linear-gradient(#1f0614,var(--wine) 45%,#1f0614)}
 
-.wedding-head{max-width:40em;margin:0 auto clamp(48px,8vw,96px);text-align:center}
+.wedding-head{--veil:linear-gradient(rgba(31,6,20,.28),rgba(20,7,15,.2) 34%,rgba(20,7,15,.86) 68%,#1f0614);display:grid;place-content:end center;min-height:min(94vh,900px);min-height:min(94svh,900px);margin:calc(clamp(56px,9vw,120px) * -1) calc(var(--gutter) * -1) clamp(48px,8vw,96px);padding:clamp(56px,9vw,120px) var(--gutter) clamp(36px,5vw,64px);text-align:center}
+.wedding-head>.video-copy{max-width:40em}
+.wedding-head>.video-copy>p:not(.eyebrow){color:var(--ivory)}
 .wedding-head h3{font-size:clamp(3rem,10vw,5.6rem)}
 .moment{display:grid;gap:clamp(20px,3vw,48px);max-width:1360px;margin:0 auto}
 .moment+.moment{margin-top:clamp(56px,9vw,120px)}
@@ -192,7 +200,8 @@ html:not(.js) .intro{display:none}
 /* ---------- Seven promises ---------- */
 .promises{position:relative;padding:clamp(72px,11vw,140px) var(--gutter);background:var(--rani);color:#fff6ee;overflow:hidden}
 .promises .eyebrow{color:#ffe2ab}
-.promises-head{max-width:34em;margin:0 auto clamp(40px,7vw,80px);text-align:center}
+.promises-head{--veil:linear-gradient(rgba(120,8,52,.28),rgba(120,8,52,.26) 36%,rgba(150,12,64,.9) 70%,var(--rani));display:grid;place-content:end center;justify-items:center;min-height:min(88vh,820px);min-height:min(88svh,820px);margin:calc(clamp(72px,11vw,140px) * -1) calc(var(--gutter) * -1) clamp(40px,7vw,80px);padding:clamp(72px,11vw,140px) var(--gutter) clamp(24px,4vw,44px);text-align:center}
+.promises-head>.video-copy{max-width:34em}
 .promises-head h2{font-family:var(--hindi);font-weight:400;font-size:clamp(3.4rem,13vw,6.4rem);line-height:1.25;margin:.05em 0 .15em}
 .vows{position:relative;display:grid;gap:clamp(18px,3vw,28px);max-width:980px;margin:0 auto}
 @media (min-width:760px){
@@ -210,7 +219,7 @@ html:not(.js) .intro{display:none}
 .vow:last-child .vow-word{font-size:clamp(3rem,9vw,4rem)}
 
 /* ---------- Just us ---------- */
-.us{position:relative;padding:clamp(72px,11vw,140px) 0;background:#0b0409;overflow:hidden}
+.us{--veil:linear-gradient(rgba(11,4,9,.62),rgba(11,4,9,.72) 50%,rgba(11,4,9,.9));position:relative;padding:clamp(72px,11vw,140px) 0;background:#0b0409;overflow:hidden}
 .us-head{position:relative;max-width:34em;margin:0 auto clamp(32px,5vw,56px);padding:0 var(--gutter);text-align:center}
 .us-head h2{font-family:var(--script);font-weight:400;font-size:clamp(3.8rem,14vw,6.4rem);line-height:1.15;margin:.05em 0 .1em}
 .us-head p:last-child{color:var(--ivory-dim)}
@@ -247,9 +256,10 @@ html:not(.js) .intro{display:none}
 .album-grid::after{content:"";flex:4000 1 0}
 
 /* ---------- Forever ---------- */
-.forever{position:relative;padding:clamp(88px,14vw,170px) var(--gutter) calc(clamp(72px,10vw,120px) + env(safe-area-inset-bottom));background:radial-gradient(120% 70% at 50% 100%,#3a0d27,var(--night) 70%);text-align:center;overflow:hidden}
+.forever{--veil:linear-gradient(rgba(20,7,15,.72),rgba(20,7,15,.66) 55%,rgba(42,10,28,.86));position:relative;padding:clamp(88px,14vw,170px) var(--gutter) calc(clamp(72px,10vw,120px) + env(safe-area-inset-bottom));background:radial-gradient(120% 70% at 50% 100%,#3a0d27,var(--night) 70%);text-align:center;overflow:hidden}
 .forever-inner{position:relative}
 .days{font-family:var(--display);font-weight:600;font-size:clamp(5.6rem,24vw,11rem);line-height:1;color:var(--gold);margin:.06em 0 .02em;font-variant-numeric:lining-nums}
+.forever .anniv{color:var(--ivory)}
 .days-label{font-family:var(--display);font-style:italic;font-weight:500;font-size:clamp(1.6rem,5vw,2.4rem);line-height:1.2}
 .anniv{margin-top:.8em;color:var(--ivory-dim)}
 .forever-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:2em}

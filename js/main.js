@@ -420,6 +420,29 @@
     });
   }
 
+  /* ---------- Background videos ---------- */
+  // Each clip downloads only as she nears it, and pauses once off screen.
+  // With "reduce motion" or data saver on, the still image stays instead.
+  var dataSaver = navigator.connection && navigator.connection.saveData;
+  if ('IntersectionObserver' in window && !calm && !dataSaver) {
+    var bgObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (!v.getAttribute('src')) v.src = v.dataset.src;
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});
+        } else if (v.getAttribute('src')) {
+          v.pause();
+        }
+      });
+    }, { rootMargin: '250px 0px' });
+    document.querySelectorAll('video.bg-video').forEach(function (v) {
+      v.muted = true;
+      bgObserver.observe(v);
+    });
+  }
+
   /* ---------- Hero carousel ---------- */
   var heroData = window.HERO || [];
   var hero = $('hero'), heroBox = $('heroSlides'), dots = $('heroDots'), pauseBtn = $('heroPause');
