@@ -49,17 +49,19 @@
 <main>
 
 <!-- ============ Hero ============ -->
-<header class="hero" id="hero">
-  <picture>
-    <source media="(min-aspect-ratio: 1/1)" srcset="images/hero/hero-wide.jpg">
-    <img src="images/hero/hero-tall.jpg" alt="The two of us under a canopy of golden fairy lights on our wedding night" fetchpriority="high">
-  </picture>
+<header class="hero" id="hero" role="group" aria-roledescription="carousel" aria-label="Photos from our wedding album">
+  <div class="hero-slides" id="heroSlides"></div>
   <div class="hero-text">
     <p class="eyebrow">24 June 2026</p>
     <h1 id="heroTitle">Anand <span class="amp">&amp;</span> You</h1>
     <p class="hero-sub">Everything from the days we became us, kept in one place, just for you.</p>
   </div>
-  <a class="scroll-cue" href="#letter" aria-label="Scroll to the letter"><span></span></a>
+  <button class="hero-arrow hero-prev" id="heroPrev" type="button" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="hero-arrow hero-next" id="heroNext" type="button" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  <div class="hero-controls">
+    <div class="hero-dots" id="heroDots"></div>
+    <button class="hero-pause" id="heroPause" type="button" aria-label="Pause slideshow"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="heroPauseIcon" d="M8 5v14M16 5v14"/></svg></button>
+  </div>
 </header>
 
 <!-- ============ Letter ============ -->
@@ -98,11 +100,11 @@
       <p>The first promise was a small one, about the size of your finger. There were flowers, a lot of relatives, a tray with two rings on it, and me trying to keep my hands steady.</p>
       <button class="see-all" data-cat="ring" type="button"></button>
     </header>
-    <div class="mosaic" data-cat="ring" data-show="2,4,1,0,8,5,11,9"></div>
+    <div class="mosaic" data-cat="ring" data-show="2,5,0,3,7,6,10,8"></div>
   </div>
   <div class="quiet">
     <p class="quiet-line reveal">Then the photographer took us away, and for a few minutes the day went very quiet.</p>
-    <div class="mosaic" data-cat="ring" data-show="12,15,14,16"></div>
+    <div class="mosaic" data-cat="ring" data-show="13,14,15,17"></div>
   </div>
 </section>
 
@@ -115,7 +117,7 @@
       <p>The Lagun came with trays of gifts and a patrika that fixed every date in ink. After that there was no pretending. The countdown had started, and I sat there garlanded and blessed, thinking about you.</p>
       <button class="see-all" data-cat="lagun" type="button"></button>
     </header>
-    <div class="mosaic" data-cat="lagun" data-show="0,1,6,2,4"></div>
+    <div class="mosaic" data-cat="lagun" data-show="0,1,2,3,4"></div>
   </div>
 </section>
 
@@ -141,7 +143,7 @@
       <p>You only heard about this one, so here is the evidence. They covered me in turmeric, then they covered each other, and by the end not one white shirt had survived.</p>
       <button class="see-all" data-cat="haldi" type="button"></button>
     </header>
-    <div class="mosaic" data-cat="haldi" data-show="0,1,3,5,6"></div>
+    <div class="mosaic" data-cat="haldi" data-show="0,1,2,3,4"></div>
   </div>
 </section>
 
@@ -154,7 +156,7 @@
       <p>One day to go, and everyone decided sunglasses were compulsory. There was music, there was dancing, and there was an <span lang="hi">ॐ</span> on my palm that I kept looking at. By the time that colour faded, you would be home.</p>
       <button class="see-all" data-cat="sangeet" type="button"></button>
     </header>
-    <div class="mosaic" data-cat="sangeet" data-show="0,2,1,3,7"></div>
+    <div class="mosaic" data-cat="sangeet" data-show="0,1,2,3,7"></div>
   </div>
 </section>
 
@@ -172,7 +174,7 @@
       <h4>Coming to get you</h4>
       <p>I bowed at our mandir, took the blessings at the door, and then we set off with lights, paper in the air, and more dancing than anyone had planned for.</p>
     </div>
-    <div class="mosaic" data-cat="wedding" data-show="0,3,5,6"></div>
+    <div class="mosaic" data-cat="wedding" data-show="0,2,5,4"></div>
   </div>
 
   <div class="moment flip">
@@ -180,7 +182,7 @@
       <h4>Then you arrived</h4>
       <p>You came in under a canopy of flowers. I can&rsquo;t tell you what was happening around me, because I wasn&rsquo;t looking at anything else.</p>
     </div>
-    <div class="mosaic" data-cat="wedding" data-show="11,9,10"></div>
+    <div class="mosaic" data-cat="wedding" data-show="8,10,9"></div>
   </div>
 
   <div class="moment">
@@ -189,7 +191,7 @@
       <p>Our path was marked with seven signs. We walked it together through the fog and the sparks, your hand in mine, one promise at a time.</p>
       <a class="text-link" href="#promises">Read the promises</a>
     </div>
-    <div class="mosaic" data-cat="wedding" data-show="8,14,16,15,17"></div>
+    <div class="mosaic" data-cat="wedding" data-show="6,12,14,13,16"></div>
   </div>
 
   <div class="moment flip">
@@ -197,7 +199,7 @@
       <h4>Varmala</h4>
       <p>Two garlands, two very excited families, and one twirl for the cameras. Then everyone we love came up on stage, one group at a time, to bless us.</p>
     </div>
-    <div class="mosaic" data-cat="wedding" data-show="19,21,24,26,22,29"></div>
+    <div class="mosaic" data-cat="wedding" data-show="17,18,19,23,24,26"></div>
   </div>
 
   <div class="moment">
@@ -205,7 +207,7 @@
       <h4>The morning</h4>
       <p>By morning the lights were off. It was only the fire, the sindoor, and your hands with mine. All that noise, and this quiet part was what made us married.</p>
     </div>
-    <div class="mosaic" data-cat="wedding" data-show="31,35,36,32,37"></div>
+    <div class="mosaic" data-cat="wedding" data-show="32,30,31,29,33"></div>
   </div>
 
   <div class="moment vidai">
@@ -213,7 +215,7 @@
       <h4>Vidai</h4>
       <p>I know what this morning was for you. I was standing right there. You left one home for me, and I have not forgotten it for a single day since.</p>
     </div>
-    <div class="mosaic" data-cat="wedding" data-show="38,39"></div>
+    <div class="mosaic" data-cat="wedding" data-show="34,35"></div>
   </div>
 </section>
 

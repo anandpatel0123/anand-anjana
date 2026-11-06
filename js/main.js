@@ -400,6 +400,103 @@
     });
   }
 
+  /* ---------- Hero carousel ---------- */
+  var heroData = window.HERO || [];
+  var hero = $('hero'), heroBox = $('heroSlides'), dots = $('heroDots'), pauseBtn = $('heroPause');
+  var heroI = 0, heroTimer = 0, heroPaused = calm, heroHover = false, heroSeen = true;
+  var HERO_MS = 5500;
+
+  var heroSlides = heroData.map(function (s, i) {
+    var el = document.createElement('div');
+    el.className = 'hero-slide' + (s.w / s.h < 1.1 ? ' tall' : '');
+    el.setAttribute('role', 'group');
+    el.setAttribute('aria-roledescription', 'slide');
+    el.setAttribute('aria-label', (i + 1) + ' of ' + heroData.length);
+    el.style.setProperty('--pos', s.pos);
+    var bg = document.createElement('div');
+    bg.className = 'hero-bg';
+    var img = document.createElement('img');
+    img.className = 'hero-photo';
+    img.alt = s.t;
+    img.width = s.w;
+    img.height = s.h;
+    el.append(bg, img);
+    heroBox.appendChild(el);
+    var dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'hero-dot';
+    dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
+    dot.addEventListener('click', function () { heroGo(i); });
+    dots.appendChild(dot);
+    return { el: el, bg: bg, img: img, dot: dot, data: s };
+  });
+
+  // Load only the slide on show and the next one, so the page stays light on phones
+  function heroLoad(i) {
+    var s = heroSlides[i];
+    if (!s || s.img.getAttribute('src')) return;
+    s.img.src = 'images/' + s.data.f + '.jpg';
+    s.bg.style.backgroundImage = 'url(images/' + s.data.f + '-bg.jpg)';
+  }
+  function heroShow(i) {
+    heroI = (i + heroSlides.length) % heroSlides.length;
+    heroLoad(heroI);
+    heroLoad((heroI + 1) % heroSlides.length);
+    heroSlides.forEach(function (s, n) {
+      s.el.classList.toggle('on', n === heroI);
+      s.el.setAttribute('aria-hidden', String(n !== heroI));
+      if (n === heroI) s.dot.setAttribute('aria-current', 'true'); else s.dot.removeAttribute('aria-current');
+    });
+  }
+  function heroRunning() {
+    return !heroPaused && !heroHover && heroSeen && !document.hidden && !lb.open && !document.body.classList.contains('locked') && !hero.querySelector(':focus-visible');
+  }
+  function heroArm() {
+    clearTimeout(heroTimer);
+    heroTimer = setTimeout(function () {
+      if (heroRunning()) heroShow(heroI + 1);
+      heroArm();
+    }, HERO_MS);
+  }
+  function heroGo(i) { heroShow(i); heroArm(); }
+
+  if (heroSlides.length) {
+    heroShow(0);
+    heroArm();
+    $('heroPrev').addEventListener('click', function () { heroGo(heroI - 1); });
+    $('heroNext').addEventListener('click', function () { heroGo(heroI + 1); });
+    function heroPauseState() {
+      pauseBtn.setAttribute('aria-label', heroPaused ? 'Play slideshow' : 'Pause slideshow');
+      $('heroPauseIcon').setAttribute('d', heroPaused ? 'M8 5l11 7-11 7z' : 'M8 5v14M16 5v14');
+    }
+    heroPauseState();
+    pauseBtn.addEventListener('click', function () { heroPaused = !heroPaused; heroPauseState(); heroArm(); });
+    // Only the controls pause it: the hero fills the screen, and a tap counts as a hover that never ends
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      hero.querySelectorAll('.hero-arrow, .hero-controls').forEach(function (el) {
+        el.addEventListener('mouseenter', function () { heroHover = true; });
+        el.addEventListener('mouseleave', function () { heroHover = false; });
+      });
+    }
+    hero.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') heroGo(heroI - 1);
+      if (e.key === 'ArrowRight') heroGo(heroI + 1);
+    });
+    var hx = null, hy = null;
+    hero.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 1) { hx = e.touches[0].clientX; hy = e.touches[0].clientY; } else { hx = null; }
+    }, { passive: true });
+    hero.addEventListener('touchend', function (e) {
+      if (hx === null) return;
+      var dx = e.changedTouches[0].clientX - hx, dy = e.changedTouches[0].clientY - hy;
+      hx = null;
+      if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.4) heroGo(heroI + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) { heroSeen = entries[0].isIntersecting; }, { threshold: .25 }).observe(hero);
+    }
+  }
+
   /* ---------- Top nav ---------- */
   var top = $('top');
   var links = Array.prototype.slice.call(top.querySelectorAll('a'));
