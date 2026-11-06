@@ -356,15 +356,36 @@
   document.querySelectorAll('canvas.lights').forEach(fairyLights);
 
   /* ---------- Music (only if a song is set) ---------- */
-  var audio = null;
+  var audio = null, playMusic = null, soundLabel = null;
   if (S.music) {
     audio = new Audio(S.music);
     audio.loop = true;
-    audio.volume = .55;
+    audio.volume = 0;
     var soundBtn = $('sound');
+    var MUSIC_VOLUME = .5, fadeTimer = 0, wantMusic = false;
+    soundLabel = function () {
+      soundBtn.classList.toggle('off', !wantMusic);
+      soundBtn.setAttribute('aria-label', wantMusic ? 'Pause music' : 'Play music');
+    };
+    function fadeIn() {
+      clearInterval(fadeTimer);
+      fadeTimer = setInterval(function () {
+        audio.volume = Math.min(MUSIC_VOLUME, audio.volume + .025);
+        if (audio.volume >= MUSIC_VOLUME) clearInterval(fadeTimer);
+      }, 150);
+    }
+    playMusic = function () {
+      var started = audio.play();
+      if (started && started.then) {
+        started.then(function () { wantMusic = true; soundLabel(); fadeIn(); }, function () { wantMusic = false; soundLabel(); });
+      }
+    };
     soundBtn.addEventListener('click', function () {
-      if (audio.paused) { audio.play(); soundBtn.classList.remove('off'); soundBtn.setAttribute('aria-label', 'Pause music'); }
-      else { audio.pause(); soundBtn.classList.add('off'); soundBtn.setAttribute('aria-label', 'Play music'); }
+      if (audio.paused) { playMusic(); } else { wantMusic = false; audio.pause(); soundLabel(); }
+    });
+    // Stop when she locks the phone or switches apps, and carry on when she comes back
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) audio.pause(); else if (wantMusic) audio.play();
     });
   }
 
@@ -379,12 +400,11 @@
   function startMusic() {
     if (!audio) return;
     $('sound').hidden = false;
-    var play = audio.play();
-    if (play && play.catch) play.catch(function () { $('sound').classList.add('off'); });
+    playMusic();
   }
   if (seen()) {
     intro.classList.add('skip');
-    if (audio) { $('sound').hidden = false; $('sound').classList.add('off'); audio.pause(); }
+    if (audio) { $('sound').hidden = false; soundLabel(); }
   } else {
     document.body.classList.add('locked');
     $('envelope').addEventListener('click', function open() {

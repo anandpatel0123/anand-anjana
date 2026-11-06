@@ -11,5 +11,5 @@ window.SETTINGS = {
   wifeName: "Anjana",
   yourName: "Anand",
   weddingDate: "2026-06-24",
-  music: ""
+  music: "music/tere-mere-sapne.mp3"
 };
